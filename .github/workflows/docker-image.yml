@@ -15,6 +15,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Get tag
+      id: tag
+      uses: dawidd6/action-get-tag@v1
     - name: Build the Docker image
       run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ steps.tag.outputs.tag }}
     - name: Log into registry
