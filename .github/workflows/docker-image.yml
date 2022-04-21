@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ env.HEALTH_CHECK }}:$(date +%s)
+      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ env.HEALTH_CHECK }}:${{ steps.tag.outputs.tag }}
     - name: Log into registry
       uses: docker/login-action@v1
       with:
