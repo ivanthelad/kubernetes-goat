@@ -5,7 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+env:
+  HEALTH_CHECK: goat/k8s-goat-health-check
 jobs:
 
   build:
@@ -15,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag HEALTH_CHECK:$(date +%s)
     - name: Log into registry
       uses: docker/login-action@v1
       with:
@@ -28,4 +29,4 @@ jobs:
         push: true
         build-args: |
           version=${{ steps.tag.outputs.tag }}
-        tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}        
+        tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ steps.tag.outputs.tag }}        
