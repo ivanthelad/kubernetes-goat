@@ -55,7 +55,7 @@ jobs:
       continue-on-error: true
       id: container-scan
       with:
-        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }} 
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         severity-threshold: WARN
     - name: Build & Push
       uses: docker/build-push-action@v2
