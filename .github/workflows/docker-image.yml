@@ -47,12 +47,15 @@ jobs:
         registry: ${{ secrets.ACR_ENDPOINT }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}  
+    - name: Build the Docker image
+      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ steps.meta.outputs.tags }}
+ 
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
       id: container-scan
       with:
-        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ steps.meta.outputs.tags }}
         severity-threshold: WARN
     - name: Build & Push
       uses: docker/build-push-action@v2
