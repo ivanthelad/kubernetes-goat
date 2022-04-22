@@ -47,6 +47,13 @@ jobs:
         registry: ${{ secrets.ACR_ENDPOINT }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}  
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest
+        severity-threshold: WARN
     - name: Build & Push
       uses: docker/build-push-action@v2
       with:
@@ -55,3 +62,4 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }},${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest
         labels: ${{ steps.meta.outputs.labels }}     
+        
