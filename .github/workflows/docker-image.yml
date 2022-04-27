@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  HEALTH_CHECK: k8sgoathealthcheck
+  HEALTH_CHECK: goat/k8s-goat-healthcheck
 jobs:
 
   build:
