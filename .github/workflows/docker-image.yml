@@ -71,7 +71,7 @@ jobs:
         echo "github.sha=$GITHUB_SHA"
         docker build infrastructure/health-check/ --file infrastructure/hunger-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
    
-   - name: Push Docker image 
+    - name: Push Docker image 
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
@@ -81,7 +81,7 @@ jobs:
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
-      id: container-scan
+      id: container-scan1
       with:
         image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         severity-threshold: WARN
@@ -89,14 +89,14 @@ jobs:
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
       with: 
-        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        scan-results-path: ${{ steps.container-scan1.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
 
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
-      id: container-scan
+      id: container-scan2
       with:
         image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
         severity-threshold: WARN
@@ -104,7 +104,7 @@ jobs:
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
       with: 
-        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        scan-results-path: ${{ steps.container-scan2.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
   
@@ -113,7 +113,7 @@ jobs:
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
-      id: container-scan
+      id: container-scan3
       with:
         image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
         severity-threshold: WARN
@@ -121,7 +121,7 @@ jobs:
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
       with: 
-        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        scan-results-path: ${{ steps.container-scan3.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
         
@@ -129,7 +129,7 @@ jobs:
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
-      id: container-scan
+      id: container-scan4
       with:
         image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
         severity-threshold: WARN
@@ -137,7 +137,7 @@ jobs:
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
       with: 
-        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        scan-results-path: ${{ steps.container-scan4.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
         
