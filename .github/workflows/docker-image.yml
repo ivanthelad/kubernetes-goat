@@ -10,10 +10,7 @@ env:
   SYSTEM_MONITOR: goat/k8s-goat-system-monitor
   INTERNAL_API: goat/k8s-goat-internal-api
   HUNGER_CHECK: k8s-goat-hunger-check
-  
-
 jobs:
-
   build:
 
     runs-on: ubuntu-latest
