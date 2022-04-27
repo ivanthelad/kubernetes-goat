@@ -61,15 +61,15 @@ jobs:
     - name: Build the Docker image SYSTEM_MONITOR
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/health-check/ --file infrastructure/system-monitor/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
+        docker build infrastructure/system-monitor/ --file infrastructure/system-monitor/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
     - name: Build the Docker image HIDDEN_LAYERS
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/health-check/ --file infrastructure/hidden-in-layers/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
+        docker build infrastructure/hidden-in-layers/ --file infrastructure/hidden-in-layers/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
     - name: Build the Docker image HUNGER_CHECK
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/health-check/ --file infrastructure/hunger-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
+        docker build infrastructure/hunger-check/ --file infrastructure/hunger-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
    
     - name: Push Docker image 
       run: |
