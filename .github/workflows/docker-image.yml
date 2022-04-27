@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  HEALTH_CHECK: k8s-goat-health-check
+  HEALTH_CHECK: k8sgoathealthcheck
 jobs:
 
   build:
@@ -35,27 +35,39 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
           type=sha
+ #   -
+ #     name: Set up QEMU
+ #     uses: docker/setup-qemu-action@v1
+ #   -
+ #     name: Set up Docker Buildx
+ #     uses: docker/setup-buildx-action@v1          
+ #   - name: Log into registry
+ #     uses: docker/login-action@v1
+ #     with:
+ #       registry: ${{ secrets.ACR_ENDPOINT }}
+ #       username: ${{ secrets.ACR_USERNAME }}
+ #       password: ${{ secrets.ACR_PASSWORD }}  
+
     -
-      name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
-    -
-      name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1          
-    - name: Log into registry
-      uses: docker/login-action@v1
+      name: Login to DockerHub
+      uses: docker/login-action@v1 
       with:
-        registry: ${{ secrets.ACR_ENDPOINT }}
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}  
+        login-server: ${{ secrets.ACR_ENDPOINT }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build the Docker image
-      run: docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest
- 
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
+    - name: Push Docker image 
+      run: |
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
       id: container-scan
       with:
-        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         severity-threshold: WARN
     - name: Build & Push
       uses: docker/build-push-action@v2
@@ -63,7 +75,7 @@ jobs:
         context: infrastructure/health-check/
         file: infrastructure/health-check/Dockerfile
         push: true
-        tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest 
+        tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }} 
         labels: ${{ steps.meta.outputs.labels }}  
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
