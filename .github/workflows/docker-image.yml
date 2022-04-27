@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  HEALTH_CHECK: goat/k8s-goat-health-check
+  HEALTH_CHECK: k8s-goat-health-check
 jobs:
 
   build:
@@ -65,10 +65,10 @@ jobs:
         push: true
         tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:latest 
         labels: ${{ steps.meta.outputs.labels }}  
-  #  - name: Post logs to appinsights
-  #    uses: Azure/publish-security-assessments@v0
-  #    with: 
-  #      scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
-  #      connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
-  #      subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
         
