@@ -7,7 +7,7 @@ on:
 env:
   HEALTH_CHECK: goat/k8s-goat-healthcheck
   SYSTEM_MONITOR: goat/k8s-goat-system-monitor
-  INTERNAL_API: goat/k8s-goat-internal-api
+  HIDDEN_LAYERS: goat/k8s-goat-hidden-in-layers 
   HUNGER_CHECK: goat/k8s-goat-hunger-check
 jobs:
   build:
@@ -62,10 +62,10 @@ jobs:
       run: |
         echo "github.sha=$GITHUB_SHA"
         docker build infrastructure/health-check/ --file infrastructure/system-monitor/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
-    - name: Build the Docker image INTERNAL_API
+    - name: Build the Docker image HIDDEN_LAYERS
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/health-check/ --file infrastructure/internal-api/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        docker build infrastructure/health-check/ --file infrastructure/hidden-in-layers/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
     - name: Build the Docker image HUNGER_CHECK
       run: |
         echo "github.sha=$GITHUB_SHA"
@@ -75,7 +75,7 @@ jobs:
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
-        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
 
     - uses: Azure/container-scan@v0
@@ -115,7 +115,7 @@ jobs:
       continue-on-error: true
       id: container-scan3
       with:
-        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
         severity-threshold: WARN
 
     - name: Post logs to appinsights
