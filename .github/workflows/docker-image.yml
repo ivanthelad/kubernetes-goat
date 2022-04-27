@@ -11,9 +11,7 @@ env:
   INTERNAL_API: goat/k8s-goat-internal-api
   HUNGER_CHECK: k8s-goat-hunger-check
   
-  infrastructure/system-monitor/ goat/k8s-goat-system-monitor
-  infrastructure/internal-api/
-  hunger-check
+
 jobs:
 
   build:
