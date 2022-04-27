@@ -8,7 +8,7 @@ env:
   HEALTH_CHECK: goat/k8s-goat-healthcheck
   SYSTEM_MONITOR: goat/k8s-goat-system-monitor
   INTERNAL_API: goat/k8s-goat-internal-api
-  HUNGER_CHECK:  goat/k8s-goat-hunger-check
+  HUNGER_CHECK: goat/k8s-goat-hunger-check
 jobs:
   build:
     runs-on: ubuntu-latest
