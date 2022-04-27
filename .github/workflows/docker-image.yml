@@ -7,6 +7,13 @@ on:
     branches: [ master ]
 env:
   HEALTH_CHECK: goat/k8s-goat-healthcheck
+  SYSTEM_MONITOR: goat/k8s-goat-system-monitor
+  INTERNAL_API: goat/k8s-goat-internal-api
+  HUNGER_CHECK: k8s-goat-hunger-check
+  
+  infrastructure/system-monitor/ goat/k8s-goat-system-monitor
+  infrastructure/internal-api/
+  hunger-check
 jobs:
 
   build:
@@ -55,13 +62,30 @@ jobs:
         registry: ${{ secrets.ACR_ENDPOINT }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}  
-    - name: Build the Docker image
+    - name: Build the Docker image HEALTHCHECK
       run: |
         echo "github.sha=$GITHUB_SHA"
         docker build infrastructure/health-check/ --file infrastructure/health-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
-    - name: Push Docker image 
+    - name: Build the Docker image SYSTEM_MONITOR
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/health-check/ --file infrastructure/system-monitor/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
+    - name: Build the Docker image INTERNAL_API
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/health-check/ --file infrastructure/internal-api/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+    - name: Build the Docker image HUNGER_CHECK
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/health-check/ --file infrastructure/hunger-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
+   
+   - name: Push Docker image 
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
+
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
@@ -69,14 +93,55 @@ jobs:
       with:
         image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         severity-threshold: WARN
-    - name: Build & Push
-      uses: docker/build-push-action@v2
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan
       with:
-        context: infrastructure/health-check/
-        file: infrastructure/health-check/Dockerfile
-        push: true
-        tags: ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }} 
-        labels: ${{ steps.meta.outputs.labels }}  
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+  
+  
+  
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+        
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
+        severity-threshold: WARN
+
     - name: Post logs to appinsights
       uses: Azure/publish-security-assessments@v0
       with: 
