@@ -14,6 +14,7 @@ env:
   INFO_APP: goat/k8s-goat-info-app
   BATCH_CHECK: goat/k8s-goat-batch-check
   GOAT_HOME: goat/k8s-goat-home
+  BUILD_CODE: k8s-goat-build-code 
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -96,10 +97,11 @@ jobs:
       run: |
         echo "github.sha=$GITHUB_SHA"
         docker build infrastructure/k8s-goat-home/ --file infrastructure/k8s-goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
-    - name: Build the Docker image GOAT_HOME
+ 
+    - name: Build the Docker image BUILD_CODE
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/goat-home/ --file infrastructure/goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
+        docker build infrastructure/build-code/ --file infrastructure/build-code/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}    
     - name: Push Docker image 
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
@@ -110,7 +112,7 @@ jobs:
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.BATCH_CHECK }}:${{ github.sha }}
-        
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
@@ -254,5 +256,20 @@ jobs:
       uses: Azure/publish-security-assessments@v0
       with: 
         scan-results-path: ${{ steps.container-scan9.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }} 
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan BUILD_CODE'
+      continue-on-error: true
+      id: container-scan10
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights BUILD_CODE
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan10.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }} 
