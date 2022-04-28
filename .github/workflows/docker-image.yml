@@ -95,7 +95,7 @@ jobs:
     - name: Build the Docker image GOAT_HOME
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/goat-home/ --file infrastructure/goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
+        docker build infrastructure/k8s-goat-home/ --file infrastructure/k8s-goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
     - name: Build the Docker image GOAT_HOME
       run: |
         echo "github.sha=$GITHUB_SHA"
