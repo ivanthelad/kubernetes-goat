@@ -14,7 +14,8 @@ env:
   INFO_APP: goat/k8s-goat-info-app
   BATCH_CHECK: goat/k8s-goat-batch-check
   GOAT_HOME: goat/k8s-goat-home
-  BUILD_CODE: k8s-goat-build-code 
+  BUILD_CODE: goat/k8s-goat-build-code 
+  CACHE_STORE: goat/k8s-goat-cache-store 
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -101,7 +102,12 @@ jobs:
     - name: Build the Docker image BUILD_CODE
       run: |
         echo "github.sha=$GITHUB_SHA"
-        docker build infrastructure/build-code/ --file infrastructure/build-code/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}    
+        docker build infrastructure/build-code/ --file infrastructure/build-code/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}  
+        
+    - name: Build the Docker image CACHE_STORE
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/cache-store/ --file infrastructure/cache-store/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.CACHE_STORE }}:${{ github.sha }}  
     - name: Push Docker image 
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
