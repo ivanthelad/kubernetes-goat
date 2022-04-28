@@ -116,9 +116,11 @@ jobs:
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.POOR_REGISTRY }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INFO_APP }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.BATCH_CHECK }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.BUILD_CODE }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.CACHE_STORE }}:${{ github.sha }}
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
