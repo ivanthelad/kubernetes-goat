@@ -9,6 +9,11 @@ env:
   SYSTEM_MONITOR: goat/k8s-goat-system-monitor
   HIDDEN_LAYERS: goat/k8s-goat-hidden-in-layers 
   HUNGER_CHECK: goat/k8s-goat-hunger-check
+  POOR-REGISTRY: goat/k8s-goat-poor-registry
+  INTERNAL_API: goat/k8s-goat-internal-api
+  INFO_APP: goat/k8s-goat-info-app
+  BATCH_CHECK: goat/k8s-goat-batch-check
+  GOAT_HOME: goat/k8s-goat-home
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -70,14 +75,42 @@ jobs:
       run: |
         echo "github.sha=$GITHUB_SHA"
         docker build infrastructure/hunger-check/ --file infrastructure/hunger-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
-   
+    - name: Build the Docker image POOR_REGISTRY
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/poor-registry/ --file infrastructure/poor-registry/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.POOR_REGISTRY }}:${{ github.sha }}
+    - name: Build the Docker image INTERNAL_API
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/internal-api/ --file infrastructure/internal-api/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+    - name: Build the Docker image INFO_APP
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/info-app/ --file infrastructure/info-app/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.INFO_APP }}:${{ github.sha }}       
+        
+    - name: Build the Docker image BATCH_CHECK
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/batch-check/ --file infrastructure/batch-check/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.BATCH_CHECK }}:${{ github.sha }} 
+    - name: Build the Docker image GOAT_HOME
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/goat-home/ --file infrastructure/goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
+    - name: Build the Docker image GOAT_HOME
+      run: |
+        echo "github.sha=$GITHUB_SHA"
+        docker build infrastructure/goat-home/ --file infrastructure/goat-home/Dockerfile --tag ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}    
     - name: Push Docker image 
       run: |
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HEALTH_CHECK }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.SYSTEM_MONITOR }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HIDDEN_LAYERS }}:${{ github.sha }}
         docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.HUNGER_CHECK }}:${{ github.sha }}
-
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.POOR_REGISTRY }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}
+        docker push  ${{ secrets.ACR_ENDPOINT }}/${{ env.BATCH_CHECK }}:${{ github.sha }}
+        
     - uses: Azure/container-scan@v0
       name: 'Docker - Azure Defender Scan'
       continue-on-error: true
@@ -140,4 +173,86 @@ jobs:
         scan-results-path: ${{ steps.container-scan4.outputs.scan-report-path }}
         connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
         subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+
+
+
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan5
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env. POOR-REGISTRY }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan5.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
         
+        
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan6
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.INTERNAL_API }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan6.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}
+        
+        
+        
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan7
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.INFO_APP }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan7.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }}        
+
+
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan8
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.BATCH_CHECK }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan8.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }} 
+
+    - uses: Azure/container-scan@v0
+      name: 'Docker - Azure Defender Scan'
+      continue-on-error: true
+      id: container-scan9
+      with:
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env.GOAT_HOME }}:${{ github.sha }}
+        severity-threshold: WARN
+
+    - name: Post logs to appinsights
+      uses: Azure/publish-security-assessments@v0
+      with: 
+        scan-results-path: ${{ steps.container-scan9.outputs.scan-report-path }}
+        connection-string: ${{ secrets.AZ_APPINSIGHTS_CONNECTION_STRING }}
+        subscription-token: ${{ secrets.AZ_SUBSCRIPTION_TOKEN }} 
