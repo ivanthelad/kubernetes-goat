@@ -9,7 +9,7 @@ env:
   SYSTEM_MONITOR: goat/k8s-goat-system-monitor
   HIDDEN_LAYERS: goat/k8s-goat-hidden-in-layers 
   HUNGER_CHECK: goat/k8s-goat-hunger-check
-  POOR-REGISTRY: goat/k8s-goat-poor-registry
+  POOR_REGISTRY: goat/k8s-goat-poor-registry
   INTERNAL_API: goat/k8s-goat-internal-api
   INFO_APP: goat/k8s-goat-info-app
   BATCH_CHECK: goat/k8s-goat-batch-check
@@ -182,7 +182,7 @@ jobs:
       continue-on-error: true
       id: container-scan5
       with:
-        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env. POOR-REGISTRY }}:${{ github.sha }}
+        image-name: ${{ secrets.ACR_ENDPOINT }}/${{ env. POOR_REGISTRY }}:${{ github.sha }}
         severity-threshold: WARN
 
     - name: Post logs to appinsights
